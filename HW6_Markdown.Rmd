@@ -1,0 +1,89 @@
+---
+title: "HW6_Markdown"
+author: "Phacha"
+date: "2026-03-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## R Markdown
+
+## Introduction
+
+This analysis explores house prices and unemployment rates over time.
+
+We expect to see some relationship between these variables.
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# Load the data (Ensure 'house_prices.rda' is in the same folder as this .Rmd file)
+load("house_prices.rda")
+
+# Convert the string into an actual Date object
+house_prices$date <- as.Date(house_prices$date)
+
+#Part 1
+# 2(a): Create the faceted plot
+ggplot(house_prices, aes(x = date, y = house_price_index)) +
+  geom_line(color = "blue") +
+  facet_wrap(~ state) +
+  scale_x_date(
+    breaks = as.Date(c("1980-01-01", "2000-01-01", "2020-01-01")),
+    labels = c("'80", "'00", "'20")
+  ) +
+  labs(title = "House Price Index and Unemployment Rate Over Time, by State",
+       x = "Year",
+       y = "House Price Index") +
+  theme_minimal()
+  
+#Part 2&3
+# 2(b): Reshape the data as requested
+house_reshaped <- house_prices %>%
+  gather(key = "measure", value = "value", -date, -state, -house_price_perc)
+
+# 2(c): Create the replicated plot with two lines
+ggplot(house_reshaped, aes(x = date, y = value, color = measure)) +
+  geom_line() +
+  facet_wrap(~ state) +
+  scale_x_date(
+    breaks = as.Date(c("1980-01-01", "2000-01-01", "2020-01-01")),
+    labels = c("'80", "'00", "'20")
+  ) +
+  labs(title = "House Price Index and Unemployment Rate Over Time, by State",
+       x = "Year",
+       y = "Value") +
+  theme_minimal()
+
+```
+
+## Including Comments
+
+
+###Part 4: Figure Critique and Comments
+
+In my opinion, this is not a good figure because it is ineffective at communicating the underlying data. With better design, the dataset could provide meaningful insights into the relationship between house prices and the unemployment rate. However, the current visualization fails due to several major flaws:
+
+Scale Mismatch: The core issue is that two entirely different types of values are plotted on the same Y-axis. The house_price_index operates in the hundreds (up to around 400), while unemploy_perc is measured in much smaller values (typically between 3% and 12%). Because the Y-axis must extend to 400 to accommodate the housing data, the unemployment line is visually compressed at the bottom. This effectively hides the variation in unemployment, making it appear almost flat. As a result, the unemployment data loses its meaning. If a viewer is unfamiliar with the actual data, they might not even notice the unemployment trend or may incorrectly interpret it as constant over time.
+
+Visual Overcrowding: Using facet_wrap to display 50 state-level plots within a standard window size leads to severe overcrowding. State names, axis labels, and values overlap, creating a figure that is difficult to read and interpret.
+
+Aesthetics and Labels: The x-axis is not presented clearly. Truncating the first two digits and using labels like ’80, ’00, and ’20 can be confusing for readers. It would be better to display the full year, although this may bring space constraints (which not good). Alternatively, a legend or clearer labeling could help clarify that ’80 refers to 1980, ’00 to 2000, and ’20 to 2020. The state names were also cut off, as you can see. Additionally, other aesthetic elements—such as the title, axis labels, and legend—should be revised to accurately reflect the data shown in the graph.
+
+Proposed Improvements
+
+Although these issues could be fixed (I have intentionally left them as-is for commentary), a more professional approach would include the following improvements:
+
+Normalize the Data: Instead of plotting raw values, we could convert both variables into percentage changes from a baseline year (e.g., setting 1980 as 0% for both the housing index and unemployment rate). This would place both variables on the same scale, making it much easier to compare their trends over time. If not this method, there may be other ways to normalize the scale or improve data preparation to make this visualization more effective.
+
+Consider Alternative Visualizations: Using different types of figures could also improve clarity. For example, an interactive choropleth map—with hover tooltips for state-level values and a time slider—would be highly effective. Similarly, an interactive scatter plot with these features would provide a clear and flexible way to explore the relationship between the variables in each state.
+
+
+
